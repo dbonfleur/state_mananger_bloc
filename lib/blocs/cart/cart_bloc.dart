@@ -1,19 +1,27 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../models/order_model.dart';
 import '../../repositories/cart_repository.dart';
+import '../order/order_bloc.dart';
+import '../order/order_event.dart';
 import 'cart_event.dart';
 import 'cart_state.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
   final CartRepository cartRepository;
+  final OrderBloc orderBloc;
+  
   ValueNotifier<int> itemCountNotifier = ValueNotifier<int>(0);
 
-  CartBloc(this.cartRepository) : super(CartInitial()) {
+  CartBloc(this.cartRepository, this.orderBloc) : super(CartInitial()) {
     on<AddItemToCart>(_onAddItemToCart);
     on<RemoveItemFromCart>(_onRemoveItemFromCart);
     on<UpdateItemQuantity>(_onUpdateItemQuantity);
     on<LoadCart>(_onLoadCart);
+    on<ConfirmPurchase>(_onConfirmPurchase);
     cartRepository.cartNotifier.addListener(() {
       add(LoadCart());
     });
@@ -46,9 +54,23 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     itemCountNotifier.value = itemCount;
   }
 
+  void _onConfirmPurchase(event, emit) {
+    final order = Order(
+        id: DateTime.now().toString(),
+        items: List.from(cartRepository.cart.items),
+        total: cartRepository.cart.total,
+        date: DateTime.now(),
+      );
+      orderBloc.add(AddOrder(order));
+      cartRepository.clearCart();
+      emit(CartUpdated(cartRepository.cart));
+  }
+
   @override
   Future<void> close() {
     itemCountNotifier.dispose();
     return super.close();
   }
+
+  
 }

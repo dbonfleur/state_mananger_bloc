@@ -41,7 +41,7 @@ class ProductItem extends StatelessWidget {
             const SizedBox(width: 10),
             Column(
               children: [
-                Text('\$${product.price.toString()}', style: const TextStyle(fontSize: 16)),
+                Text('R\$${product.price.toString()}', style: const TextStyle(fontSize: 16)),
                 Row(
                   children: [
                     StreamBuilder(

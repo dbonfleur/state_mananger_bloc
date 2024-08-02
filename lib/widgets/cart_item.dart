@@ -60,7 +60,7 @@ class CartItemWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Text('Subtotal: \$${(cartItem.quantity * cartItem.product.price).toStringAsFixed(2)}'),
+                  Text('Subtotal: R\$${(cartItem.quantity * cartItem.product.price).toStringAsFixed(2)}'),
                 ],
               ),
             ),

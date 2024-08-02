@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../blocs/order/order_bloc.dart';
 import '../blocs/product/product_bloc.dart';
 import '../blocs/product/product_event.dart';
 import '../blocs/product/product_state.dart';
@@ -9,9 +10,11 @@ import '../models/cart_model.dart';
 import '../repositories/product_repository.dart';
 import '../repositories/cart_repository.dart';
 import '../repositories/wishlist_repository.dart';
+import '../repositories/order_repository.dart';
 import '../widgets/product_item.dart';
 import 'cart_screen.dart';
 import 'wishlist_screen.dart';
+import 'order_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -24,6 +27,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   late ProductBloc _productBloc;
   late CartBloc _cartBloc;
   late WishlistBloc _wishlistBloc;
+  late OrderBloc _orderBloc;
   late CartRepository _cartRepository;
 
   @override
@@ -31,7 +35,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
     super.initState();
     _productBloc = ProductBloc(ProductRepository());
     _cartRepository = CartRepository();
-    _cartBloc = CartBloc(_cartRepository);
+    _orderBloc = OrderBloc(OrderRepository());
+    _cartBloc = CartBloc(_cartRepository, _orderBloc);
     _wishlistBloc = WishlistBloc(WishlistRepository());
     _productBloc.add(LoadProducts());
   }
@@ -41,6 +46,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     _productBloc.close();
     _cartBloc.close();
     _wishlistBloc.close();
+    _orderBloc.close();
     super.dispose();
   }
 
@@ -58,12 +64,25 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
+  void _navigateToOrderHistory(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => OrderHistoryScreen(orderBloc: _orderBloc)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Produtos'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              _navigateToOrderHistory(context);
+            },
+          ),
           ValueListenableBuilder<Cart>(
             valueListenable: _cartRepository.cartNotifier,
             builder: (context, cart, child) {

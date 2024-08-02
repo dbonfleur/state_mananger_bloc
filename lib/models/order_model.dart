@@ -2,14 +2,14 @@ import 'cart_model.dart';
 
 class Order {
   final String id;
-  final DateTime date;
-  final double total;
   final List<CartItem> items;
+  final double total;
+  final DateTime date;
 
   Order({
     required this.id,
-    required this.date,
-    required this.total,
     required this.items,
+    required this.total,
+    required this.date,
   });
 }

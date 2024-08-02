@@ -19,7 +19,7 @@ class WishlistItem extends StatelessWidget {
       child: ListTile(
         leading: Image.network(product.imageUrl, width: 50, height: 50, fit: BoxFit.cover),
         title: Text(product.name),
-        subtitle: Text('\$${product.price.toString()}'),
+        subtitle: Text('R\$${product.price.toString()}'),
         trailing: IconButton(
           icon: const Icon(Icons.remove_circle, color: Colors.red),
           onPressed: () {

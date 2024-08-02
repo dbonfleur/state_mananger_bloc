@@ -13,7 +13,7 @@ class OrderItemWidget extends StatelessWidget {
       child: ListTile(
         title: Text('Order ID: ${order.id}'),
         subtitle: Text('Date: ${order.date.toString()}'),
-        trailing: Text('Total: \$${order.total.toString()}'),
+        trailing: Text('Total: R\$${order.total.toString()}'),
       ),
     );
   }

@@ -5,22 +5,15 @@ import '../models/cart_model.dart';
 import '../repositories/cart_repository.dart';
 import '../widgets/cart_item.dart';
 
-class CartScreen extends StatefulWidget {
+class CartScreen extends StatelessWidget {
   final CartBloc cartBloc;
   final CartRepository cartRepository;
 
-  const CartScreen({super.key, required this.cartBloc, required this.cartRepository});
-
-  @override
-  _CartScreenState createState() => _CartScreenState();
-}
-
-class _CartScreenState extends State<CartScreen> {
-  @override
-  void initState() {
-    super.initState();
-    widget.cartBloc.add(LoadCart());
-  }
+  const CartScreen({
+    super.key,
+    required this.cartBloc,
+    required this.cartRepository,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,18 +22,16 @@ class _CartScreenState extends State<CartScreen> {
         title: const Text('Carrinho'),
       ),
       body: ValueListenableBuilder<Cart>(
-        valueListenable: widget.cartRepository.cartNotifier,
-        builder: (context, cart, _) {
+        valueListenable: cartRepository.cartNotifier,
+        builder: (context, cart, child) {
           return Column(
             children: [
               Expanded(
                 child: ListView.builder(
                   itemCount: cart.items.length,
                   itemBuilder: (context, index) {
-                    return CartItemWidget(
-                      cartItem: cart.items[index],
-                      cartBloc: widget.cartBloc,
-                    );
+                    final cartItem = cart.items[index];
+                    return CartItemWidget(cartItem: cartItem, cartBloc: cartBloc);
                   },
                 ),
               ),
@@ -48,24 +39,15 @@ class _CartScreenState extends State<CartScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    Text(
-                      'Total: \$${cart.total.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
+                    Text('Total: R\$${cart.total.toStringAsFixed(2)}'),
+                    const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        // Implement checkout functionality
+                        cartBloc.add(ConfirmPurchase());
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Compra confirmada!')),
+                        );
                       },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 50,
-                          vertical: 15,
-                        ),
-                      ),
                       child: const Text('Confirmar Compra'),
                     ),
                   ],

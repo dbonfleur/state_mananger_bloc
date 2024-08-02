@@ -30,6 +30,11 @@ class CartRepository {
     _updateCart();
   }
 
+  void clearCart() {
+    _cart.items.clear();
+    _updateCart();
+  }
+
   void _updateCart() {
     _cart.calculateTotal();
     cartNotifier.value = Cart(items: List.from(_cart.items), total: _cart.total);

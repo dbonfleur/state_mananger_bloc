@@ -38,3 +38,5 @@ class UpdateItemQuantity extends CartEvent {
 }
 
 class LoadCart extends CartEvent {}
+
+class ConfirmPurchase extends CartEvent {}

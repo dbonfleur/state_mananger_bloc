@@ -66,6 +66,33 @@ flutter:
     - assets/images/maca.png
     - assets/images/banana.webp
     - assets/images/laranja.webp
+    - assets/images/uva.png
+    - assets/images/pera.png
+    - assets/images/tomate.png
+    - assets/images/cenoura.png
+    - assets/images/batata.png
+    - assets/images/brocolis.png
+    - assets/images/alface.png
+    - assets/images/suco_laranja.png
+    - assets/images/refri.png
+    - assets/images/agua_mineral.png
+    - assets/images/cerveja.png
+    - assets/images/vinho.png
+    - assets/images/sanduiche.png
+    - assets/images/bolo.png
+    - assets/images/salgadinho.png
+    - assets/images/biscoito.png
+    - assets/images/pizza.png
+    - assets/images/sabonete.png
+    - assets/images/shampoo.png
+    - assets/images/condicionador.png
+    - assets/images/pasta.png
+    - assets/images/desodorante.png
+    - assets/images/aveia.png
+    - assets/images/granola.png
+    - assets/images/floco_milho.png
+    - assets/images/trigo.png
+    - assets/images/cevada.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

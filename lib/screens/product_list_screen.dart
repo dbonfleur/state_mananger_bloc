@@ -7,6 +7,7 @@ import '../blocs/cart/cart_bloc.dart';
 import '../blocs/wishlist/wishlist_bloc.dart';
 import '../blocs/wishlist/wishlist_state.dart';
 import '../models/cart_model.dart';
+import '../models/product_model.dart';
 import '../repositories/product_repository.dart';
 import '../repositories/cart_repository.dart';
 import '../repositories/wishlist_repository.dart';
@@ -29,6 +30,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
   late WishlistBloc _wishlistBloc;
   late OrderBloc _orderBloc;
   late CartRepository _cartRepository;
+  final TextEditingController _searchController = TextEditingController();
+  final List<String> _selectedCategories = [];
 
   @override
   void initState() {
@@ -47,6 +50,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     _cartBloc.close();
     _wishlistBloc.close();
     _orderBloc.close();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -74,6 +78,25 @@ class _ProductListScreenState extends State<ProductListScreen> {
       context,
       MaterialPageRoute(builder: (context) => OrderHistoryScreen(orderBloc: _orderBloc)),
     );
+  }
+
+  List<Product> _filterProducts(List<Product> products) {
+    final query = _searchController.text.toLowerCase();
+    return products.where((product) {
+      final matchesName = product.name.toLowerCase().startsWith(query);
+      final matchesCategory = _selectedCategories.isEmpty || _selectedCategories.contains(product.category);
+      return matchesName && matchesCategory;
+    }).toList();
+  }
+
+  void _toggleCategory(String category) {
+    setState(() {
+      if (_selectedCategories.contains(category)) {
+        _selectedCategories.remove(category);
+      } else {
+        _selectedCategories.add(category);
+      }
+    });
   }
 
   @override
@@ -149,30 +172,83 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
         ],
       ),
-      body: StreamBuilder<ProductState>(
-        stream: _productBloc.stream,
-        initialData: _productBloc.state,
-        builder: (context, snapshot) {
-          final state = snapshot.data;
-          if (state is ProductLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is ProductLoaded) {
-            return ListView.builder(
-              itemCount: state.products.length,
-              itemBuilder: (context, index) {
-                return ProductItem(
-                  product: state.products[index],
-                  cartBloc: _cartBloc,
-                  wishlistBloc: _wishlistBloc,
-                );
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Pesquisar',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {});
               },
-            );
-          } else if (state is ProductError) {
-            return Center(child: Text('Failed to load products: ${state.message}'));
-          } else {
-            return Container();
-          }
-        },
+            ),
+          ),
+          SizedBox(
+            height: 50,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: ['Frutas', 'Legumes', 'Bebidas', 'Lanches', 'Produtos Higiênicos', 'Cereais']
+                  .map((category) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: ChoiceChip(
+                          label: Text(
+                            category,
+                            style: TextStyle(
+                              color: _selectedCategories.contains(category) ? Colors.green : Colors.black,
+                            ),
+                          ),
+                          selected: _selectedCategories.contains(category),
+                          onSelected: (selected) {
+                            _toggleCategory(category);
+                          },
+                          backgroundColor: Colors.white,
+                          selectedColor: Colors.transparent,
+                          side: BorderSide(
+                            color: _selectedCategories.contains(category) ? Colors.green : Colors.black,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<ProductState>(
+              stream: _productBloc.stream,
+              initialData: _productBloc.state,
+              builder: (context, snapshot) {
+                final state = snapshot.data;
+                if (state is ProductLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is ProductLoaded) {
+                  final filteredProducts = _filterProducts(state.products);
+                  return ListView.builder(
+                    itemCount: filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      return ProductItem(
+                        product: filteredProducts[index],
+                        cartBloc: _cartBloc,
+                        wishlistBloc: _wishlistBloc,
+                      );
+                    },
+                  );
+                } else if (state is ProductError) {
+                  return Center(child: Text('Failed to load products: ${state.message}'));
+                } else {
+                  return Container();
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

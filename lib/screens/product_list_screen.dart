@@ -60,7 +60,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
   void _navigateToWishlist(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => WishlistScreen(wishlistBloc: _wishlistBloc)),
+      MaterialPageRoute(
+        builder: (context) => WishlistScreen(
+          wishlistBloc: _wishlistBloc,
+          cartBloc: _cartBloc,
+        ),
+      ),
     );
   }
 

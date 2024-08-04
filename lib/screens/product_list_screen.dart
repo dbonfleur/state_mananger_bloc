@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import '../blocs/cart/cart_bloc.dart';
+import '../blocs/cart/cart_state.dart';
 import '../blocs/order/order_bloc.dart';
 import '../blocs/product/product_bloc.dart';
 import '../blocs/product/product_event.dart';
 import '../blocs/product/product_state.dart';
-import '../blocs/cart/cart_bloc.dart';
 import '../blocs/wishlist/wishlist_bloc.dart';
 import '../blocs/wishlist/wishlist_state.dart';
-import '../models/cart_model.dart';
-import '../models/product_model.dart';
 import '../repositories/product_repository.dart';
 import '../repositories/cart_repository.dart';
 import '../repositories/wishlist_repository.dart';
@@ -29,19 +28,19 @@ class _ProductListScreenState extends State<ProductListScreen> {
   late CartBloc _cartBloc;
   late WishlistBloc _wishlistBloc;
   late OrderBloc _orderBloc;
-  late CartRepository _cartRepository;
   final TextEditingController _searchController = TextEditingController();
-  final List<String> _selectedCategories = [];
 
   @override
   void initState() {
     super.initState();
     _productBloc = ProductBloc(ProductRepository());
-    _cartRepository = CartRepository();
     _orderBloc = OrderBloc(OrderRepository());
-    _cartBloc = CartBloc(_cartRepository, _orderBloc);
+    _cartBloc = CartBloc(CartRepository(), _orderBloc);
     _wishlistBloc = WishlistBloc(WishlistRepository());
     _productBloc.add(LoadProducts());
+    _searchController.addListener(() {
+      _productBloc.add(UpdateSearchQuery(_searchController.text));
+    });
   }
 
   @override
@@ -57,7 +56,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   void _navigateToCart(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CartScreen(cartBloc: _cartBloc, cartRepository: _cartRepository)),
+      MaterialPageRoute(builder: (context) => CartScreen(cartBloc: _cartBloc)),
     );
   }
 
@@ -80,25 +79,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  List<Product> _filterProducts(List<Product> products) {
-    final query = _searchController.text.toLowerCase();
-    return products.where((product) {
-      final matchesName = product.name.toLowerCase().startsWith(query);
-      final matchesCategory = _selectedCategories.isEmpty || _selectedCategories.contains(product.category);
-      return matchesName && matchesCategory;
-    }).toList();
-  }
-
-  void _toggleCategory(String category) {
-    setState(() {
-      if (_selectedCategories.contains(category)) {
-        _selectedCategories.remove(category);
-      } else {
-        _selectedCategories.add(category);
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,32 +91,43 @@ class _ProductListScreenState extends State<ProductListScreen> {
               _navigateToOrderHistory(context);
             },
           ),
-          ValueListenableBuilder<Cart>(
-            valueListenable: _cartRepository.cartNotifier,
-            builder: (context, cart, child) {
-              final itemCount = cart.items.fold(0, (total, item) => total + item.quantity);
-              return Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.shopping_cart),
-                    onPressed: () {
-                      _navigateToCart(context);
-                    },
-                  ),
-                  if (itemCount > 0)
-                    Positioned(
-                      right: 0,
-                      child: CircleAvatar(
-                        radius: 10,
-                        backgroundColor: Colors.red,
-                        child: Text(
-                          '$itemCount',
-                          style: const TextStyle(color: Colors.white, fontSize: 12),
+          StreamBuilder<CartState>(
+            stream: _cartBloc.stream,
+            initialData: _cartBloc.state,
+            builder: (context, snapshot) {
+              if (snapshot.data is CartUpdated) {
+                final cart = (snapshot.data as CartUpdated).cart;
+                final itemCount = cart.items.fold(0, (total, item) => total + item.quantity);
+                return Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.shopping_cart),
+                      onPressed: () {
+                        _navigateToCart(context);
+                      },
+                    ),
+                    if (itemCount > 0)
+                      Positioned(
+                        right: 0,
+                        child: CircleAvatar(
+                          radius: 10,
+                          backgroundColor: Colors.red,
+                          child: Text(
+                            '$itemCount',
+                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                          ),
                         ),
                       ),
-                    ),
-                ],
-              );
+                  ],
+                );
+              } else {
+                return IconButton(
+                  icon: const Icon(Icons.shopping_cart),
+                  onPressed: () {
+                    _navigateToCart(context);
+                  },
+                );
+              }
             },
           ),
           Stack(
@@ -184,40 +175,48 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
-              onChanged: (value) {
-                setState(() {});
-              },
             ),
           ),
           SizedBox(
             height: 50,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: ['Frutas', 'Legumes', 'Bebidas', 'Lanches', 'Produtos Higiênicos', 'Cereais']
-                  .map((category) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: ChoiceChip(
-                          label: Text(
-                            category,
-                            style: TextStyle(
-                              color: _selectedCategories.contains(category) ? Colors.green : Colors.black,
-                            ),
-                          ),
-                          selected: _selectedCategories.contains(category),
-                          onSelected: (selected) {
-                            _toggleCategory(category);
-                          },
-                          backgroundColor: Colors.white,
-                          selectedColor: Colors.transparent,
-                          side: BorderSide(
-                            color: _selectedCategories.contains(category) ? Colors.green : Colors.black,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                        ),
-                      ))
-                  .toList(),
+            child: StreamBuilder<ProductState>(
+              stream: _productBloc.stream,
+              initialData: _productBloc.state,
+              builder: (context, snapshot) {
+                final state = snapshot.data;
+                if (state is ProductLoaded) {
+                  return ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: ['Frutas', 'Legumes', 'Bebidas', 'Lanches', 'Produtos Higiênicos', 'Cereais']
+                        .map((category) => Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              child: ChoiceChip(
+                                label: Text(
+                                  category,
+                                  style: TextStyle(
+                                    color: state.selectedCategories.contains(category) ? Colors.green : Colors.black,
+                                  ),
+                                ),
+                                selected: state.selectedCategories.contains(category),
+                                onSelected: (selected) {
+                                  _productBloc.add(ToggleCategory(category));
+                                },
+                                backgroundColor: Colors.white,
+                                selectedColor: Colors.transparent,
+                                side: BorderSide(
+                                  color: state.selectedCategories.contains(category) ? Colors.green : Colors.black,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                              ),
+                            ))
+                        .toList(),
+                  );
+                } else {
+                  return Container();
+                }
+              },
             ),
           ),
           Expanded(
@@ -229,7 +228,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 if (state is ProductLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ProductLoaded) {
-                  final filteredProducts = _filterProducts(state.products);
+                  final filteredProducts = state.products.where((product) {
+                    final matchesName = product.name.toLowerCase().startsWith(state.searchQuery.toLowerCase());
+                    final matchesCategory = state.selectedCategories.isEmpty || state.selectedCategories.contains(product.category);
+                    return matchesName && matchesCategory;
+                  }).toList();
+
                   return ListView.builder(
                     itemCount: filteredProducts.length,
                     itemBuilder: (context, index) {

@@ -71,6 +71,4 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     itemCountNotifier.dispose();
     return super.close();
   }
-
-  
 }

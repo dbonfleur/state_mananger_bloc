@@ -1,13 +1,13 @@
-# E-commerce App
+# E-commerce App BLoC
 
-Este é um aplicativo de e-commerce desenvolvido em Flutter utilizando o Bloc para gerenciamento de estado. O aplicativo possui funcionalidades como listagem de produtos, carrinho de compras, wishlist e atualização dinâmica da interface do usuário com base nos estados do Bloc.
+Este é um aplicativo exemplo de um e-commerce desenvolvido em Flutter utilizando o Bloc para gerenciamento de estado. O aplicativo possui funcionalidades como listagem de produtos, carrinho de compras, wishlist e atualização dinâmica da interface do usuário com base nos estados do Bloc.
 
 ## Funcionalidades
 
 - **Listagem de Produtos**: Exibe uma lista de produtos disponíveis com informações como imagem, nome, descrição e preço. Os usuários podem adicionar produtos ao carrinho ou à wishlist.
 - **Carrinho de Compras**: Exibe os produtos adicionados ao carrinho com detalhes como nome, quantidade, preço e subtotal. Permite aumentar ou diminuir a quantidade de cada produto, remover produtos do carrinho e calcular o total do pedido em tempo real.
 - **Wishlist**: Exibe produtos que o usuário marcou como desejados, permitindo mover produtos da wishlist para o carrinho ou removê-los da wishlist.
-- **Histórico de Pedidos**: (Funcionalidade futura) Apresentará uma lista de pedidos anteriores do usuário, detalhando informações como a data do pedido e os itens comprados.
+- **Histórico de Pedidos**: Apresentará uma lista de pedidos anteriores do usuário, detalhando informações como a data do pedido e os itens comprados.
 
 ## Estrutura do Projeto
 

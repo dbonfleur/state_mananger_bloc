@@ -18,6 +18,7 @@ class CartScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Carrinho'),
       ),
+      // Bluilder para exibir o carrinho de compras
       body: StreamBuilder<CartState>(
         stream: cartBloc.stream,
         initialData: cartBloc.state,
@@ -28,7 +29,7 @@ class CartScreen extends StatelessWidget {
             final cart = state.cart;
 
             if (cart.items.isEmpty) {
-              return Center(child: Text('Seu carrinho está vazio.'));
+              return const Center(child: Text('Seu carrinho está vazio.'));
             }
 
             return Column(

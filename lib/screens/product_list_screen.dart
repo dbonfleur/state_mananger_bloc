@@ -91,8 +91,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
               _navigateToOrderHistory(context);
             },
           ),
+          // Bloc responsável por atualizar o ícone do carrinho de compras
           StreamBuilder<CartState>(
+            // Stream que escuta as mudanças de estado do carrinho
             stream: _cartBloc.stream,
+            // Estado inicial do stream
             initialData: _cartBloc.state,
             builder: (context, snapshot) {
               if (snapshot.data is CartUpdated) {
@@ -140,11 +143,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
               ),
               Positioned(
                 right: 0,
+                // Bloc responsável por atualizar o ícone da lista de desejos
                 child: StreamBuilder<WishlistState>(
+                  // Stream que escuta as mudanças de estado da lista de desejos
                   stream: _wishlistBloc.stream,
+                  // Estado inicial do stream
                   initialData: _wishlistBloc.state,
                   builder: (context, snapshot) {
                     final state = snapshot.data;
+                    // Se o estado atual do stream for WishlistUpdated exibe o número de itens na lista de desejos
                     final itemCount = state is WishlistUpdated ? state.wishlist.length : 0;
                     return itemCount > 0
                         ? CircleAvatar(
@@ -179,6 +186,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
           SizedBox(
             height: 50,
+            // Bloc responsável por atualizar as categorias selecionadas
             child: StreamBuilder<ProductState>(
               stream: _productBloc.stream,
               initialData: _productBloc.state,
@@ -220,6 +228,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ),
           ),
           Expanded(
+            // Bloc responsável por atualizar a lista de produtos
             child: StreamBuilder<ProductState>(
               stream: _productBloc.stream,
               initialData: _productBloc.state,

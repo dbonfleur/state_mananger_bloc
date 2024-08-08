@@ -44,6 +44,7 @@ class ProductItem extends StatelessWidget {
                 Text('R\$${product.price.toString()}', style: const TextStyle(fontSize: 16)),
                 Row(
                   children: [
+                    // Bloc do carrinho de compras
                     StreamBuilder(
                       stream: cartBloc.stream,
                       initialData: cartBloc.state,

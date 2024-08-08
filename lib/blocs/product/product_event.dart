@@ -9,10 +9,6 @@ abstract class ProductEvent extends Equatable {
 
 class LoadProducts extends ProductEvent {}
 
-class ToggleSortByName extends ProductEvent {}
-
-class ToggleSortByPrice extends ProductEvent {}
-
 class UpdateSearchQuery extends ProductEvent {
   final String query;
 
